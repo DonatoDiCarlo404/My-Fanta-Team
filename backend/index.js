@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
@@ -9,12 +10,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Rotte integrate
+app.use('/api/auth', authRoutes);
+
 // Connessione a MongoDB
 mongoose.connect(process.env.MONGO_URI)
    .then(() => console.log('Connesso a MongoDB'))
    .catch(err => console.error('Errore di connessione a MongoDB:', err));
    
-// Route
+// Route test connessione
 app.get('/test', (req, res) => {
     res.json({ message: 'Server connesso!' });
 });
