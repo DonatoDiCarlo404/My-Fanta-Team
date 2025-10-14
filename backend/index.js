@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
-const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
@@ -10,8 +9,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Importa le rotte
+const authRoutes = require('./routes/authRoutes');
+
 // Rotte integrate
 app.use('/api/auth', authRoutes);
+
+// Middleware per la gestione degli errori con importazione
+const { errorHandler } = require('./middlewares/errorMiddleware');
+app.use(errorHandler);
 
 // Connessione a MongoDB
 mongoose.connect(process.env.MONGO_URI)
