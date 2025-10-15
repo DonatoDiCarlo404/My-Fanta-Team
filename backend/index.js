@@ -11,9 +11,13 @@ app.use(express.json());
 
 // Importa le rotte
 const authRoutes = require('./routes/authRoutes');
+const teamRoutes = require('./routes/teamRoutes');
+const playerRoutes = require('./routes/playerRoutes');
 
 // Rotte integrate
 app.use('/api/auth', authRoutes);
+app.use('/api/teams', teamRoutes);
+app.use('/api/players', playerRoutes);
 
 // Middleware per la gestione degli errori con importazione
 const { errorHandler } = require('./middlewares/errorMiddleware');
