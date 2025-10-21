@@ -35,7 +35,10 @@ const Login = () => {
         throw new Error(data.message || 'Errore durante il login');
       }
 
+      // Salva il token e poi i dati utente
       localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
       navigate('/dashboard');
 
     } catch (error) {
