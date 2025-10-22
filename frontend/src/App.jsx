@@ -8,6 +8,7 @@ import TeamDetails from './pages/TeamDetails';
 import PlayerDetails from './pages/PlayerDetails';
 import Classifica from './pages/Classifica';
 import Error from './pages/Error';
+import AddPlayers from './pages/AddPlayers';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="/team/:id" element={<TeamDetails />} />
           <Route path="/player/:id" element={<PlayerDetails />} />
           <Route path="/classifica" element={<Classifica />} />
+          <Route path="/team/:id/add-players" element={<AddPlayers />} />
           <Route path="*" element={<Error />} />
         </Routes>
       </div>

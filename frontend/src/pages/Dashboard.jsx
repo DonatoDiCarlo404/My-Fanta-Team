@@ -21,9 +21,9 @@ const Dashboard = () => {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
             });
-            
+
             if (!response.ok) throw new Error('Errore nel caricamento delle squadre');
-            
+
             const data = await response.json();
             setTeams(data);
         } catch (err) {
@@ -57,11 +57,11 @@ const Dashboard = () => {
     return (
         <Container className="mt-4">
             <h1 className="mb-4">Le Mie Squadre</h1>
-            
+
             {error && <Alert variant="danger">{error}</Alert>}
 
-            <Button 
-                variant="primary" 
+            <Button
+                variant="primary"
                 className="mb-4"
                 onClick={() => setShowCreateForm(!showCreateForm)}
             >
@@ -93,12 +93,20 @@ const Dashboard = () => {
                         <Card>
                             <Card.Body>
                                 <Card.Title>{team.nomeSquadra}</Card.Title>
-                                <Button 
-                                    variant="info"
-                                    onClick={() => navigate(`/team/${team._id}`)}
-                                >
-                                    Gestisci Squadra
-                                </Button>
+                                <div className="d-flex gap-2">
+                                    <Button
+                                        variant="info"
+                                        onClick={() => navigate(`/team/${team._id}`)}
+                                    >
+                                        Gestisci Squadra
+                                    </Button>
+                                    <Button
+                                        variant="success"
+                                        onClick={() => navigate(`/team/${team._id}/add-players`)}
+                                    >
+                                        Aggiungi Giocatori
+                                    </Button>
+                                </div>
                             </Card.Body>
                         </Card>
                     </Col>
