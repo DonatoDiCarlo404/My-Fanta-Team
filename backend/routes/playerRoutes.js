@@ -31,17 +31,74 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 });
 
+// Rotta per ottenere tutti i giocatori
+router.get('/', authMiddleware, async (req, res) => {
+    try {
+        const players = await Player.find();
+        res.json(players);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Rotta per ottenere un giocatore specifico
+router.get('/:id', authMiddleware, async (req, res) => {
+    try {
+        const player = await Player.findById(req.params.id);
+        if (!player) {
+            return res.status(404).json({ message: 'Giocatore non trovato' });
+        }
+        res.json(player);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Rotta per aggiornare le statistiche di un giocatore (PATCH invece di PUT)
+router.patch('/:id', authMiddleware, async (req, res) => {
+    try {
+        const { gol, assist, ammonizioni, espulsioni } = req.body;
+        
+        // Verifica che i valori non siano negativi
+        const updates = {};
+        if (gol !== undefined) updates.gol = Math.max(0, gol);
+        if (assist !== undefined) updates.assist = Math.max(0, assist);
+        if (ammonizioni !== undefined) updates.ammonizioni = Math.max(0, ammonizioni);
+        if (espulsioni !== undefined) updates.espulsioni = Math.max(0, espulsioni);
+
+        const player = await Player.findByIdAndUpdate(
+            req.params.id,
+            updates,
+            { new: true, runValidators: true }
+        );
+
+        if (!player) {
+            return res.status(404).json({ message: 'Giocatore non trovato' });
+        }
+
+        res.json(player);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Rotta per aggiungere un giocatore a una squadra
 router.put('/:teamId/players', authMiddleware, async (req, res) => {
     try {
         const { teamId } = req.params;
         const { playerId } = req.body;
 
+        // Verifica che il giocatore esista
+        const player = await Player.findById(playerId);
+        if (!player) {
+            return res.status(404).json({ message: 'Giocatore non trovato' });
+        }
+
         const updatedTeam = await Team.findByIdAndUpdate(
             teamId,
             { $push: { players: playerId } },
             { new: true }
-        );
+        ).populate('players');
 
         if (!updatedTeam) {
             return res.status(404).json({ message: 'Squadra non trovata' });

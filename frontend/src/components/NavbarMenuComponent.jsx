@@ -31,16 +31,22 @@ const NavbarMenuComponent = () => {
           <Nav className="ms-auto">
             {user ? (
               <>
-                <Nav.Link as={Link} to="/dashboard">Dashboard</Nav.Link>
-                <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
+                <Nav.Link as={Link} to="/dashboard">
+                <span><i className="bi bi-house-door"> Dashboard</i></span></Nav.Link>
+                <Nav.Link onClick={handleLogout}>
+                  <span><i className="bi bi-person-dash"> Logout</i></span>
+                </Nav.Link>
                 <Navbar.Text className="ms-3">
-                  Benvenuto, {user.username}
+                  <span><i className="bi bi-person-check-fill"> Benvenuto, {user.username}</i></span>
                 </Navbar.Text>
               </>
             ) : (
               <>
-                <Nav.Link as={Link} to="/login">Login</Nav.Link>
-                <Nav.Link as={Link} to="/register">Register</Nav.Link>
+                <Nav.Link as={Link} to="/login">
+                <span><i className="bi bi-person-check"> Login</i></span>
+                </Nav.Link>
+                <Nav.Link as={Link} to="/register">
+                <span><i className="bi bi-person-add"> Registrati</i></span></Nav.Link>
               </>
             )}
           </Nav>

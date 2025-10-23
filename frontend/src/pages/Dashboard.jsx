@@ -56,7 +56,7 @@ const Dashboard = () => {
 
     return (
         <Container className="mt-4">
-            <h1 className="mb-4">Le Mie Squadre</h1>
+            <h1 className="mb-4 text-dark">Le Mie Squadre</h1>
 
             {error && <Alert variant="danger">{error}</Alert>}
 
@@ -92,19 +92,19 @@ const Dashboard = () => {
                     <Col key={team._id} md={4} className="mb-4">
                         <Card>
                             <Card.Body>
-                                <Card.Title>{team.nomeSquadra}</Card.Title>
-                                <div className="d-flex gap-2">
+                                <Card.Title className='text-white text-center mb-3'>{team.nomeSquadra}</Card.Title>
+                                <div className="d-flex gap-2 justify-content-center">
                                     <Button
                                         variant="info"
                                         onClick={() => navigate(`/team/${team._id}`)}
                                     >
-                                        Gestisci Squadra
+                                        <i className="bi bi-pencil-square"> Gestione Squadra</i>
                                     </Button>
                                     <Button
                                         variant="success"
                                         onClick={() => navigate(`/team/${team._id}/add-players`)}
                                     >
-                                        Aggiungi Giocatori
+                                        <i className="bi bi-person-add"> Aggiungi Giocatore</i>
                                     </Button>
                                 </div>
                             </Card.Body>

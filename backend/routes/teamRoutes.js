@@ -1,19 +1,49 @@
 const express = require('express');
 const router = express.Router();
-const { authMiddleware } = require('../middlewares/authMiddleware');
 const Team = require('../models/Team');
-// const Player = require('../models/Player');
+const { authMiddleware } = require('../middlewares/authMiddleware');
 
-// Rotta per creare una nuova squadra
-router.post("/", authMiddleware, async (req, res) => {
+// Ottieni tutte le squadre dell'utente
+router.get('/', authMiddleware, async (req, res) => {
+    try {
+        const teams = await Team.find({ userId: req.user.id });
+        res.json(teams);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Ottieni una squadra specifica con i suoi giocatori
+router.get('/:id', authMiddleware, async (req, res) => {
+    try {
+        const team = await Team.findById(req.params.id)
+            .populate('players'); // Popola i dati dei giocatori
+
+        if (!team) {
+            return res.status(404).json({ message: 'Squadra non trovata' });
+        }
+
+        // Verifica che l'utente sia il proprietario della squadra
+        if (team.userId.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'Non autorizzato' });
+        }
+
+        res.json(team);
+    } catch (error) {
+        console.error('Errore recupero squadra:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// Crea una nuova squadra
+router.post('/', authMiddleware, async (req, res) => {
     try {
         const { nomeSquadra } = req.body;
 
-        // Crea nuova squadra per l'utente autenticato
         const newTeam = await Team.create({
             nomeSquadra,
             userId: req.user.id,
-            players: [],
+            players: []
         });
 
         res.status(201).json(newTeam);
@@ -22,35 +52,46 @@ router.post("/", authMiddleware, async (req, res) => {
     }
 });
 
-// Rotta per ottenere tutte le squadre dell'utente autenticato
-router.get("/", authMiddleware, async (req, res) => {
+// Aggiorna una squadra esistente
+router.put('/:id', authMiddleware, async (req, res) => {
     try {
-        const teams = await Team.find({ userId: req.user.id }).populate('players');
-        res.json(teams);
+        const team = await Team.findById(req.params.id);
+
+        if (!team) {
+            return res.status(404).json({ message: 'Squadra non trovata' });
+        }
+
+        if (team.userId.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'Non autorizzato' });
+        }
+
+        const updatedTeam = await Team.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true }
+        );
+
+        res.json(updatedTeam);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 });
 
-// Rotta per aggiornare una squadra
-router.put("/:id", authMiddleware, async (req, res) => {
+// Elimina una squadra
+router.delete('/:id', authMiddleware, async (req, res) => {
     try {
-        const { id } = req.params;
-        const updateData = req.body;
+        const team = await Team.findById(req.params.id);
 
-        const updated = await Team.findByIdAndUpdate(id, updateData, { new: true });
-        res.json(updated);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+        if (!team) {
+            return res.status(404).json({ message: 'Squadra non trovata' });
+        }
 
-// Rotta per eliminare una squadra
-router.delete("/:id", authMiddleware, async (req, res) => {
-    try {
-        const { id } = req.params;
-        await Team.findByIdAndDelete(id);
-        res.json({ message: "Squadra eliminata con successo" });
+        if (team.userId.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'Non autorizzato' });
+        }
+
+        await team.remove();
+        res.json({ message: 'Squadra eliminata con successo' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

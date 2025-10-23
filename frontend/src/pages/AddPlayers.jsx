@@ -90,7 +90,7 @@ const AddPlayers = () => {
 
   return (
     <Container className="mt-4">
-      <h1 className='d-flex justify-content-center'>Aggiungi Giocatori alla Squadra</h1>
+      <h1 className='d-flex justify-content-center text-dark'>Aggiungi Giocatori alla Squadra</h1>
       
       {error && <Alert variant="danger">{error}</Alert>}
 
