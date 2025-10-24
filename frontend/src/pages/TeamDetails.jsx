@@ -8,6 +8,7 @@ const TeamDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updatingPlayer, setUpdatingPlayer] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   const fetchTeam = async () => {
     setLoading(true);
@@ -76,18 +77,72 @@ const TeamDetails = () => {
     }
   };
 
+  const handleRemovePlayer = async (playerId) => {
+    if (!window.confirm('Sei sicuro di voler rimuovere questo giocatore dalla squadra?')) return;
+
+    try {
+      setUpdatingPlayer(playerId);
+      const token = localStorage.getItem('token');
+
+      const res = await fetch(`http://localhost:3000/api/players/${id}/players/${playerId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || 'Errore durante la rimozione del giocatore');
+      }
+
+      const updatedTeam = await res.json();
+      setTeam(updatedTeam);
+
+      setSuccessMessage('Giocatore rimosso dalla squadra!');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUpdatingPlayer(null);
+    }
+  };
+
+
   if (loading) return <Spinner animation="border" className="d-block mx-auto mt-5" />;
-  if (error) return <Alert variant="danger">{error}</Alert>;
   if (!team) return null;
 
   return (
     <Container className="mt-4">
-      <h2 className="text-center mb-4">{team.nomeSquadra}</h2>
+      {successMessage && (
+        <Alert variant="success" className='text-center'>
+        {successMessage}
+        </Alert>
+      )}
+      {error && (
+        <Alert variant="danger" className='text-center'>
+        {error}
+        </Alert>
+      )}
+      <h2 className="text-center mb-4">Squadra: {team.nomeSquadra}</h2>
       <Row>
         {team.players.map((player) => (
           <Col key={player._id} md={4} className="mb-3">
-            <Card className="shadow-sm h-100">
+            <Card className="shadow-sm h-100 position-relative">
               <Card.Body>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  className="position-absolute top-0 end-0 m-2 rounded-circle"
+                  onClick={() => handleRemovePlayer(player._id)}
+                  disabled={updatingPlayer === player._id}
+                >
+                  {updatingPlayer === player._id ? (
+                    <Spinner size="sm" />
+                  ) : (
+                    <i className="bi bi-x-lg"></i>
+                  )}
+                </Button>
                 <Card.Title className='text-white'>{player.nome}</Card.Title>
                 <Card.Subtitle className="mb-2 text-white">{player.ruolo}</Card.Subtitle>
                 <Card.Text>

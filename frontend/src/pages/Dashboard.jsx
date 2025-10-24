@@ -7,6 +7,8 @@ const Dashboard = () => {
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [teamName, setTeamName] = useState('');
     const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+    const [deletingTeam, setDeletingTeam] = useState(null);
     const navigate = useNavigate();
 
     // Carica le squadre dell'utente
@@ -54,11 +56,52 @@ const Dashboard = () => {
         }
     };
 
+    const handleDeleteTeam = async (teamId) => {
+        if (!window.confirm('Sei sicuro di voler eliminare questa squadra? L\'operazione è irreversibile.')) return;
+
+        try {
+            setDeletingTeam(teamId);
+            const token = localStorage.getItem('token');
+
+            const response = await fetch(`http://localhost:3000/api/teams/${teamId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) throw new Error(data.message || 'Errore durante l\'eliminazione della squadra');
+
+            // Rimuovi la squadra dalla lista locale
+            setTeams((prev) => prev.filter((team) => team._id !== teamId));
+
+            // Mostra messaggio di successo temporaneo
+            setSuccessMessage('Squadra eliminata con successo!');
+            setTimeout(() => setSuccessMessage(''), 3000);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setDeletingTeam(null);
+        }
+    };
+
     return (
         <Container className="mt-4">
-            <h1 className="mb-4 text-dark">Le Mie Squadre</h1>
+            <h1 className="mb-4 text-white">Le Mie Squadre</h1>
 
-            {error && <Alert variant="danger">{error}</Alert>}
+            {successMessage && (
+                <Alert variant="success" className="text-center">
+                    {successMessage}
+                </Alert>
+            )}
+            {error && (
+                <Alert variant="danger" className="text-center">
+                    {error}
+                </Alert>
+            )}
+
 
             <Button
                 variant="primary"
@@ -90,8 +133,22 @@ const Dashboard = () => {
             <Row>
                 {teams.map(team => (
                     <Col key={team._id} md={4} className="mb-4">
-                        <Card>
+                        <Card className="position-relative">
                             <Card.Body>
+                                <Button
+                                    variant="danger"
+                                    size="sm"
+                                    className="position-absolute top-0 end-0 m-2 rounded-circle"
+                                    onClick={() => handleDeleteTeam(team._id)}
+                                    disabled={deletingTeam === team._id}
+                                >
+                                    {deletingTeam === team._id ? (
+                                        <span className="spinner-border spinner-border-sm" />
+                                    ) : (
+                                        <i className="bi bi-x-lg"></i>
+                                    )}
+                                </Button>
+
                                 <Card.Title className='text-white text-center mb-3'>{team.nomeSquadra}</Card.Title>
                                 <div className="d-flex gap-2 justify-content-center">
                                     <Button

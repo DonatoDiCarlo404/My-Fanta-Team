@@ -90,7 +90,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
             return res.status(403).json({ message: 'Non autorizzato' });
         }
 
-        await team.remove();
+        await Team.findByIdAndDelete(req.params.id);
         res.json({ message: 'Squadra eliminata con successo' });
     } catch (error) {
         res.status(500).json({ message: error.message });

@@ -111,4 +111,36 @@ router.put('/:teamId/players', authMiddleware, async (req, res) => {
     }
 });
 
+// Rotta per rimuovere un giocatore da una squadra
+router.delete('/:teamId/players/:playerId', authMiddleware, async (req, res) => {
+    try {
+        const { teamId, playerId } = req.params;
+
+        // Verifica che la squadra esista
+        const team = await Team.findById(teamId);
+        if (!team) {
+            return res.status(404).json({ message: 'Squadra non trovata' });
+        }
+
+        // Verifica che il giocatore esista
+        const player = await Player.findById(playerId);
+        if (!player) {
+            return res.status(404).json({ message: 'Giocatore non trovato' });
+        }
+
+        // Rimuovi il giocatore dalla lista
+        const updatedTeam = await Team.findByIdAndUpdate(
+            teamId,
+            { $pull: { players: playerId } },
+            { new: true }
+        ).populate('players');
+
+        res.json(updatedTeam);
+    } catch (error) {
+        console.error('Errore rimozione giocatore dalla squadra:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
+
 module.exports = router;

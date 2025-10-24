@@ -90,12 +90,12 @@ const AddPlayers = () => {
 
   return (
     <Container className="mt-4">
-      <h1 className='d-flex justify-content-center text-dark'>Aggiungi Giocatori alla Squadra</h1>
+      <h1 className='d-flex justify-content-center'>Aggiungi Giocatori alla Squadra</h1>
       
       {error && <Alert variant="danger">{error}</Alert>}
 
       <Form.Group className="mb-4 d-grid justify-content-center">
-        <Form.Label>Seleziona una Squadra di Serie A</Form.Label>
+        <Form.Label className='text-white'>Seleziona una Squadra di Serie A</Form.Label>
         <Form.Control 
           as="select"
           onChange={(e) => setTeamId(e.target.value)}
