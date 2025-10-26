@@ -115,7 +115,7 @@ const Dashboard = () => {
                 <Card className="mb-4">
                     <Card.Body>
                         <Form onSubmit={handleCreateTeam}>
-                            <Form.Group className="mb-3">
+                            <Form.Group className="mb-3 text-white">
                                 <Form.Label>Nome Squadra</Form.Label>
                                 <Form.Control
                                     type="text"

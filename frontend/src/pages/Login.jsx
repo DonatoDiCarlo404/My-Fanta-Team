@@ -60,7 +60,7 @@ const Login = () => {
                 </Alert>
               )}
 
-              <Form onSubmit={handleSubmit}>
+              <Form onSubmit={handleSubmit} className='text-white'>
                 <Form.Group className="mb-3">
                   <Form.Label>Email</Form.Label>
                   <Form.Control

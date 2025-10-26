@@ -166,7 +166,7 @@ const AddPlayers = () => {
           <NavDropdown.Divider />
           <option value="115">Udinese</option>
           <NavDropdown.Divider />
-          <option value="502">Hellas Verona</option>
+          <option value="450">Hellas Verona</option>
         </Form.Control>
       </Form.Group>
 

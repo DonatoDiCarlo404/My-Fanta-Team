@@ -147,6 +147,15 @@ const TeamDetails = () => {
         </Alert>
       )}
       <h2 className="text-center mb-4">Squadra: {team.nomeSquadra}</h2>
+      <div className="text-center mb-4">
+        <Button 
+          variant="info"
+          size="lg"
+          onClick={() => navigate(`/team/${id}/classifica`)}
+        >
+          <i className="bi bi-bar-chart-fill"></i> Vedi Classifica
+        </Button>
+      </div>
       <Row>
         {sortPlayersByRole(team.players).map((player) => (
           <Col key={player._id} md={4} className="mb-3">

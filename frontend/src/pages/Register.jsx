@@ -68,7 +68,7 @@ const Register = () => {
                 </Alert>
               )}
 
-              <Form onSubmit={handleSubmit}>
+              <Form onSubmit={handleSubmit} className='text-white'>
                 <Form.Group className="mb-3">
                   <Form.Label>Username</Form.Label>
                   <Form.Control
