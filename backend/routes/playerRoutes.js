@@ -9,14 +9,16 @@ router.post('/', authMiddleware, async (req, res) => {
     try {
         const { apiId, nome, squadra, ruolo, nazionalità } = req.body;
         
-        // Verifica se il giocatore esiste già
-        const existingPlayer = await Player.findOne({ apiId });
-        if (existingPlayer) {
-            return res.status(400).json({ message: 'Giocatore già esistente' });
+        // Cerca se il giocatore esiste già
+        let player = await Player.findOne({ apiId });
+        
+        if (player) {
+            // Se il giocatore esiste, lo restituiamo invece di dare errore
+            return res.json(player);
         }
 
-        // Crea nuovo giocatore
-        const newPlayer = await Player.create({
+        // Se il giocatore non esiste, lo creiamo
+        player = await Player.create({
             apiId,
             nome,
             squadra,
@@ -24,7 +26,7 @@ router.post('/', authMiddleware, async (req, res) => {
             nazionalità
         });
 
-        res.status(201).json(newPlayer);
+        res.status(201).json(player);
     } catch (error) {
         console.error('Errore creazione giocatore:', error);
         res.status(500).json({ message: error.message });
@@ -83,30 +85,31 @@ router.patch('/:id', authMiddleware, async (req, res) => {
 });
 
 // Rotta per aggiungere un giocatore a una squadra
-router.put('/:teamId/players', authMiddleware, async (req, res) => {
+router.put('/:id/players', authMiddleware, async (req, res) => {
     try {
-        const { teamId } = req.params;
         const { playerId } = req.body;
+        const teamId = req.params.id;
 
-        // Verifica che il giocatore esista
-        const player = await Player.findById(playerId);
-        if (!player) {
-            return res.status(404).json({ message: 'Giocatore non trovato' });
+        // Verifica se la squadra esiste
+        const team = await Team.findById(teamId);
+        if (!team) {
+            return res.status(404).json({ message: 'Squadra non trovata' });
         }
 
+        // Aggiorna la squadra aggiungendo il giocatore
         const updatedTeam = await Team.findByIdAndUpdate(
             teamId,
-            { $push: { players: playerId } },
+            { $addToSet: { players: playerId } }, // Usa addToSet per evitare duplicati
             { new: true }
         ).populate('players');
 
         if (!updatedTeam) {
-            return res.status(404).json({ message: 'Squadra non trovata' });
+            return res.status(404).json({ message: 'Errore nell\'aggiornamento della squadra' });
         }
 
         res.json(updatedTeam);
     } catch (error) {
-        console.error('Errore aggiornamento squadra:', error);
+        console.error('Errore:', error);
         res.status(500).json({ message: error.message });
     }
 });

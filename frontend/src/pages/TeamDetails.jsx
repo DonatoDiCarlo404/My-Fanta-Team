@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Spinner, Alert, Badge } from 'react-bootstrap';
 
 const TeamDetails = () => {
@@ -9,6 +9,28 @@ const TeamDetails = () => {
   const [error, setError] = useState(null);
   const [updatingPlayer, setUpdatingPlayer] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const navigate = useNavigate();
+
+  // Funzione per ordinare i giocatori in base al ruolo
+  const sortPlayersByRole = (players) => {
+    const roleOrder = {
+      'Portiere': 1,
+      'Goalkeeper': 1,
+      'Difensore': 2,
+      'Defender': 2,
+      'Centrocampista': 3,
+      'Midfielder': 3,
+      'Attaccante': 4,
+      'Forward': 4,
+      'Attacker': 4
+    };
+
+    return [...players].sort((a, b) => {
+      const roleA = roleOrder[a.ruolo] || 999;
+      const roleB = roleOrder[b.ruolo] || 999;
+      return roleA - roleB;
+    });
+  };
 
   const fetchTeam = async () => {
     setLoading(true);
@@ -116,17 +138,17 @@ const TeamDetails = () => {
     <Container className="mt-4">
       {successMessage && (
         <Alert variant="success" className='text-center'>
-        {successMessage}
+          {successMessage}
         </Alert>
       )}
       {error && (
         <Alert variant="danger" className='text-center'>
-        {error}
+          {error}
         </Alert>
       )}
       <h2 className="text-center mb-4">Squadra: {team.nomeSquadra}</h2>
       <Row>
-        {team.players.map((player) => (
+        {sortPlayersByRole(team.players).map((player) => (
           <Col key={player._id} md={4} className="mb-3">
             <Card className="shadow-sm h-100 position-relative">
               <Card.Body>
@@ -145,13 +167,21 @@ const TeamDetails = () => {
                 </Button>
                 <Card.Title className='text-white'>{player.nome}</Card.Title>
                 <Card.Subtitle className="mb-2 text-white">{player.ruolo}</Card.Subtitle>
+                <Button 
+                  variant="info" 
+                  size="sm"
+                  className="w-100 mb-3"
+                  onClick={() => navigate(`/player/${player._id}`)}
+                >
+                  <i className="bi bi-info-circle"></i> Vedi Dettagli
+                </Button>
                 <Card.Text>
                   <Badge bg="primary" className="me-2">Gol: {player.gol || 0}</Badge>
                   <Badge bg="success" className="me-2">Assist: {player.assist || 0}</Badge>
                   <Badge bg="warning" className="me-2">Amm.: {player.ammonizioni || 0}</Badge>
                   <Badge bg="danger">Esp.: {player.espulsioni || 0}</Badge>
                 </Card.Text>
-
+                
                 <div className="d-flex flex-wrap gap-3 justify-content-center">
                   {/* --- GOL --- */}
                   <div className="d-flex align-items-center gap-1">

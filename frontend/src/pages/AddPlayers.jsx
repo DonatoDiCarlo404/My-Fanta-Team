@@ -5,13 +5,37 @@ import PlayerCard from '../components/PlayerCardComponent';
 
 const AddPlayers = () => {
   const [players, setPlayers] = useState([]);
+  const [teamPlayers, setTeamPlayers] = useState([]); // Nuovo stato per i giocatori della squadra
   const [error, setError] = useState('');
   const [teamId, setTeamId] = useState('');
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // Funzione per caricare i giocatori della squadra
+  const fetchTeamPlayers = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/teams/${id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Errore nel caricamento della squadra');
+
+      const data = await response.json();
+      setTeamPlayers(data.players || []);
+    } catch (err) {
+      console.error('Error fetching team players:', err);
+    }
+  };
+
+  // Carica i giocatori della squadra all'avvio
   useEffect(() => {
-    // Carica i giocatori quando viene selezionata una squadra
+    fetchTeamPlayers();
+  }, [id]);
+
+  // Carica i giocatori disponibili quando viene selezionata una squadra
+  useEffect(() => {
     const fetchPlayers = async (teamId) => {
       try {
         const response = await fetch(`http://localhost:3000/api/external/players?teamId=${teamId}`, {
@@ -23,7 +47,11 @@ const AddPlayers = () => {
         if (!response.ok) throw new Error('Errore nel caricamento dei giocatori');
 
         const data = await response.json();
-        setPlayers(data);
+        // Filtra i giocatori già presenti nella squadra
+        const filteredPlayers = data.filter(player => 
+          !teamPlayers.some(teamPlayer => teamPlayer.apiId === player.id)
+        );
+        setPlayers(filteredPlayers);
       } catch (err) {
         setError(err.message);
       }
@@ -32,71 +60,70 @@ const AddPlayers = () => {
     if (teamId) {
       fetchPlayers(teamId);
     }
-  }, [teamId]);
+  }, [teamId, teamPlayers]);
 
   const handleAddPlayer = async (player) => {
     try {
-        console.log('Sending player data:', player);
+      // Prima creiamo/otteniamo il giocatore
+      const playerResponse = await fetch('http://localhost:3000/api/players', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          apiId: player.id,
+          nome: player.nome,
+          ruolo: player.ruolo,
+          squadra: player.squadra,
+          nazionalità: player.nazionalità
+        })
+      });
 
-        // Prima creiamo il giocatore
-        const playerResponse = await fetch('http://localhost:3000/api/players', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({
-                apiId: player.id,
-                nome: player.nome,
-                ruolo: player.ruolo,
-                squadra: player.squadra,
-                nazionalità: player.nazionalità
-            })
-        });
+      if (!playerResponse.ok) {
+        const errorData = await playerResponse.json();
+        throw new Error(errorData.message || 'Errore nella creazione del giocatore');
+      }
 
-        const playerData = await playerResponse.json();
-        
-        if (!playerResponse.ok) {
-            throw new Error(playerData.message || 'Errore nella creazione del giocatore');
-        }
+      const playerData = await playerResponse.json();
 
-        console.log('Player created:', playerData);
+      // Aggiunta del giocatore alla squadra
+      const teamResponse = await fetch(`http://localhost:3000/api/teams/${id}/players`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          playerId: playerData._id
+        })
+      });
 
-        // Poi aggiungiamo il giocatore alla squadra
-        const teamResponse = await fetch(`http://localhost:3000/api/players/${id}/players`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({
-                playerId: playerData._id
-            })
-        });
+      if (!teamResponse.ok) {
+        throw new Error('Errore nell\'aggiornamento della squadra');
+      }
 
-        if (!teamResponse.ok) {
-            const errorData = await teamResponse.json();
-            throw new Error(errorData.message || 'Errore nell\'aggiornamento della squadra');
-        }
+      // Aggiorna la lista dei giocatori della squadra
+      await fetchTeamPlayers();
+      
+      // Rimuovi il giocatore dalla lista dei disponibili
+      setPlayers(prev => prev.filter(p => p.id !== player.id));
 
-        // Rimuovi il giocatore dalla lista
-        setPlayers(players.filter(p => p.id !== player.id));
-        
     } catch (err) {
-        console.error('Error details:', err);
-        setError(err.message);
+      console.error('Error details:', err);
+      setError(err.message);
     }
-};
+  };
 
   return (
     <Container className="mt-4">
       <h1 className='d-flex justify-content-center'>Aggiungi Giocatori alla Squadra</h1>
-      
+
       {error && <Alert variant="danger">{error}</Alert>}
 
       <Form.Group className="mb-4 d-grid justify-content-center">
         <Form.Label className='text-white'>Seleziona una Squadra di Serie A</Form.Label>
-        <Form.Control 
+        <Form.Control
           as="select"
           onChange={(e) => setTeamId(e.target.value)}
         >
@@ -146,8 +173,8 @@ const AddPlayers = () => {
       <Row>
         {players.map(player => (
           <Col key={player.id} md={4}>
-            <PlayerCard 
-              player={player} 
+            <PlayerCard
+              player={player}
               onAddPlayer={handleAddPlayer}
             />
           </Col>

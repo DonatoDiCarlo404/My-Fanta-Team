@@ -52,6 +52,34 @@ router.post('/', authMiddleware, async (req, res) => {
     }
 });
 
+// Rotta per aggiungere un giocatore alla squadra
+router.put('/:id/players', authMiddleware, async (req, res) => {
+    try {
+        const { playerId } = req.body;
+        const { id } = req.params;
+
+        console.log('TeamID:', id); // Debug
+        console.log('PlayerID:', playerId); // Debug
+
+        const team = await Team.findById(id);
+        
+        if (!team) {
+            return res.status(404).json({ message: 'Squadra non trovata' });
+        }
+
+        const updatedTeam = await Team.findByIdAndUpdate(
+            id,
+            { $addToSet: { players: playerId } },
+            { new: true }
+        ).populate('players');
+
+        res.json(updatedTeam);
+    } catch (error) {
+        console.error('Errore aggiornamento squadra:', error);
+        res.status(500).json({ message: error.message });
+    }
+});
+
 // Aggiorna una squadra esistente
 router.put('/:id', authMiddleware, async (req, res) => {
     try {
