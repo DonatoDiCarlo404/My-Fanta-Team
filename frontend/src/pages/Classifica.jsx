@@ -45,12 +45,16 @@ const Classifica = () => {
     .filter(player => (player.assist || 0) > 0)
     .sort((a, b) => (b.assist || 0) - (a.assist || 0));
 
+    // Totali
+    const totaleGol = marcatori.reduce((sum, player) => sum + (player.gol || 0), 0);
+    const totaleAssist = assistman.reduce((sum, player) => sum + (player.assist || 0), 0);
+
   if (loading) return <Spinner animation="border" className="d-block mx-auto mt-5" />;
   if (error) return <Alert variant="danger" className="mt-3">{error}</Alert>;
 
   return (
     <Container className="mt-4">
-      <h2 className="text-center mb-4">Classifiche della Squadra</h2>
+      <h2 className="text-center mb-4 text-dark">Classifiche della Squadra</h2>
       <Button
         variant="primary"
         onClick={() => navigate(-1)}
@@ -67,12 +71,14 @@ const Classifica = () => {
         <Tabs
           activeKey={activeTab}
           onSelect={(k) => setActiveTab(k)}
-          className="mb-4"
+          className="mb-4 custom-tabs"
         >
           <Tab
             eventKey="marcatori"
             title={`Classifica Marcatori (${marcatori.length})`}
+            className='table-dark'
           >
+            <div className="custom-tabs-content">
             {marcatori.length > 0 ? (
               <Table striped bordered hover responsive className='table-dark'>
                 <thead>
@@ -92,6 +98,11 @@ const Classifica = () => {
                       <td>{player.gol}</td>
                     </tr>
                   ))}
+                  {/* Riga totale gol */}
+                  <tr className='fw-bold bg-secondary'>
+                    <td colSpan="3" className="text-end">Totale Gol</td>
+                    <td>{totaleGol}</td>
+                  </tr>
                 </tbody>
               </Table>
             ) : (
@@ -99,13 +110,16 @@ const Classifica = () => {
                 Nessun giocatore ha ancora segnato
               </Alert>
             )}
+            </div>
           </Tab>
 
           <Tab
             eventKey="assistman"
             title={`Classifica Assist (${assistman.length})`}
           >
+            <div className="custom-tabs-content">
             {assistman.length > 0 ? (
+              <>
               <Table striped bordered hover responsive className='table-dark'>
                 <thead>
                   <tr>
@@ -124,13 +138,20 @@ const Classifica = () => {
                       <td>{player.assist}</td>
                     </tr>
                   ))}
+                  {/* Riga totale assist */}
+                  <tr className='fw-bold bg-secondary'>
+                    <td colSpan="3" className="text-end">Totale Assist</td>
+                    <td>{totaleAssist}</td>
+                  </tr>
                 </tbody>
               </Table>
+              </>
             ) : (
               <Alert variant="info" className="mt-3">
                 Nessun giocatore ha ancora fatto assist
               </Alert>
             )}
+            </div>
           </Tab>
         </Tabs>
       )}

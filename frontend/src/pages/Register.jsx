@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Form, Button, Alert, Card } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Alert, Card, InputGroup } from 'react-bootstrap';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +10,8 @@ const Register = () => {
     confirmPassword: ''
   });
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -57,19 +59,19 @@ const Register = () => {
   return (
     <Container className="mt-5">
       <Row className="justify-content-center">
-        <Col md={6}>
-          <Card>
+        <Col md={6} lg={5}>
+          <Card className="shadow-lg border-0 register-card text-white">
             <Card.Body>
-              <h2 className="text-center mb-4">Registrazione</h2>
+              <div className="text-center mb-4">
+                <i className="bi bi-person-plus text-primary" style={{ fontSize: '3rem' }}></i>
+                <h3 className="mt-2">Crea un Account</h3>
+                <p>Registrati per iniziare</p>
+              </div>
 
-              {error && (
-                <Alert variant="danger">
-                  {error}
-                </Alert>
-              )}
+              {error && <Alert variant="danger">{error}</Alert>}
 
-              <Form onSubmit={handleSubmit} className='text-white'>
-                <Form.Group className="mb-3">
+              <Form onSubmit={handleSubmit}>
+                <Form.Group className="mb-3" controlId="formUsername">
                   <Form.Label>Username</Form.Label>
                   <Form.Control
                     type="text"
@@ -77,10 +79,11 @@ const Register = () => {
                     value={formData.username}
                     onChange={handleChange}
                     required
+                    placeholder="Inserisci un nome utente"
                   />
                 </Form.Group>
 
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-3" controlId="formEmail">
                   <Form.Label>Email</Form.Label>
                   <Form.Control
                     type="email"
@@ -88,35 +91,67 @@ const Register = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
+                    placeholder="Inserisci la tua email"
                   />
                 </Form.Group>
 
-                <Form.Group className="mb-3">
+                {/* Password */}
+                <Form.Group className="mb-3" controlId="formPassword">
                   <Form.Label>Password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                  />
+                  <InputGroup>
+                    <Form.Control
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      placeholder="Crea una password"
+                    />
+                    <Button
+                      variant="outline-secondary"
+                      onClick={() => setShowPassword(!showPassword)}
+                      type="button"
+                    >
+                      <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                    </Button>
+                  </InputGroup>
                 </Form.Group>
 
-                <Form.Group className="mb-3">
+                {/* Conferma Password */}
+                <Form.Group className="mb-3" controlId="formConfirmPassword">
                   <Form.Label>Conferma Password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    required
-                  />
+                  <InputGroup>
+                    <Form.Control
+                      type={showConfirm ? 'text' : 'password'}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      required
+                      placeholder="Ripeti la password"
+                    />
+                    <Button
+                      variant="outline-secondary"
+                      onClick={() => setShowConfirm(!showConfirm)}
+                      type="button"
+                    >
+                      <i className={`bi ${showConfirm ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                    </Button>
+                  </InputGroup>
                 </Form.Group>
 
-                <Button variant="primary" type="submit" className="w-100">
-                  Registrati
+                <Button variant="primary" type="submit" className="w-100 mt-2">
+                  <i className="bi bi-person-check me-2"></i>Registrati
                 </Button>
               </Form>
+
+              <div className="text-center mt-3">
+                <small>
+                  Hai già un account?{' '}
+                  <Button variant="link" className="p-0 text-primary" onClick={() => navigate('/login')}>
+                    Accedi
+                  </Button>
+                </small>
+              </div>
             </Card.Body>
           </Card>
         </Col>

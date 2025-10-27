@@ -122,7 +122,7 @@ const AddPlayers = () => {
       {error && <Alert variant="danger">{error}</Alert>}
 
       <Form.Group className="mb-4 d-grid justify-content-center">
-        <Form.Label className='text-white'>Seleziona una Squadra di Serie A</Form.Label>
+        <Form.Label className='text-dark'>Seleziona una Squadra di Serie A</Form.Label>
         <Form.Control
           as="select"
           onChange={(e) => setTeamId(e.target.value)}

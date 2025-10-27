@@ -89,7 +89,7 @@ const Dashboard = () => {
 
     return (
         <Container className="mt-4">
-            <h1 className="mb-4 text-white">Le Mie Squadre</h1>
+            <h1 className="mb-4 text-center">Le Mie Squadre</h1>
 
             {successMessage && (
                 <Alert variant="success" className="text-center">

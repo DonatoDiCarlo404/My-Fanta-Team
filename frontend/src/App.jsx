@@ -9,6 +9,7 @@ import PlayerDetails from './pages/PlayerDetails';
 import Classifica from './pages/Classifica';
 import Error from './pages/Error';
 import AddPlayers from './pages/AddPlayers';
+import FooterComponent from './components/FooterComponent';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           <Route path="*" element={<Error />} />
         </Routes>
       </div>
+      <FooterComponent />
     </Router>
   );
 }

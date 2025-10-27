@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Form, Button, Alert, Card } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Alert, Card, InputGroup } from 'react-bootstrap';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -8,6 +8,7 @@ const Login = () => {
     password: ''
   });
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -49,19 +50,19 @@ const Login = () => {
   return (
     <Container className="mt-5">
       <Row className="justify-content-center">
-        <Col md={6}>
-          <Card>
+        <Col md={6} lg={5}>
+          <Card className="shadow-lg border-0 login-card text-white">
             <Card.Body>
-              <h2 className="text-center mb-4">Login</h2>
-              
-              {error && (
-                <Alert variant="danger">
-                  {error}
-                </Alert>
-              )}
+              <div className="text-center mb-4">
+                <i className="bi bi-person-circle text-primary" style={{ fontSize: '3rem' }}></i>
+                <h3 className="mt-2">Benvenuto</h3>
+                <p>Accedi per continuare</p>
+              </div>
 
-              <Form onSubmit={handleSubmit} className='text-white'>
-                <Form.Group className="mb-3">
+              {error && <Alert variant="danger">{error}</Alert>}
+
+              <Form onSubmit={handleSubmit}>
+                <Form.Group className="mb-3" controlId="formEmail">
                   <Form.Label>Email</Form.Label>
                   <Form.Control
                     type="email"
@@ -69,22 +70,33 @@ const Login = () => {
                     value={formData.email}
                     onChange={handleChange}
                     required
+                    placeholder="Inserisci la tua email"
                   />
                 </Form.Group>
 
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-3" controlId="formPassword">
                   <Form.Label>Password</Form.Label>
-                  <Form.Control
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                  />
+                  <InputGroup>
+                    <Form.Control
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      placeholder="Inserisci la tua password"
+                    />
+                    <Button
+                      variant="outline-secondary"
+                      onClick={() => setShowPassword(!showPassword)}
+                      type="button"
+                    >
+                      <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                    </Button>
+                  </InputGroup>
                 </Form.Group>
 
-                <Button variant="primary" type="submit" className="w-100">
-                  Accedi
+                <Button variant="primary" type="submit" className="w-100 mt-2">
+                  <i className="bi bi-box-arrow-in-right me-2"></i>Accedi
                 </Button>
               </Form>
             </Card.Body>
