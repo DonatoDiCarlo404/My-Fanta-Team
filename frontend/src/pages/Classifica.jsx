@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Tabs, Tab, Alert, Spinner, Button } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
+import { API_URL } from '../config';
 
 const Classifica = () => {
   const [players, setPlayers] = useState([]);
@@ -15,7 +16,7 @@ const Classifica = () => {
       try {
         const token = localStorage.getItem('token');
         // Modifica la chiamata API per ottenere i giocatori della squadra specifica
-        const response = await fetch(`http://localhost:3000/api/teams/${id}`, {
+        const response = await fetch(`${API_URL}/api/teams/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -54,7 +55,7 @@ const Classifica = () => {
 
   return (
     <Container className="mt-4">
-      <h2 className="text-center mb-4 text-dark">Classifiche della Squadra</h2>
+      <h2 className="text-center mb-4 text-white">Classifiche della Squadra</h2>
       <Button
         variant="primary"
         onClick={() => navigate(-1)}

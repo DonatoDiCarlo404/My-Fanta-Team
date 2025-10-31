@@ -174,3 +174,7 @@ footer i:hover {
 .footer i:hover {
   color: #0d6efd; /* blu bootstrap */
 }
+
+.tab-content {
+  margin-bottom: 2em;
+}

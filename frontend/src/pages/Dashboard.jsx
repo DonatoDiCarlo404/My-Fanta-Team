@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Form, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { API_URL } from '../config';
 
 const Dashboard = () => {
     const [teams, setTeams] = useState([]);
@@ -18,7 +19,7 @@ const Dashboard = () => {
 
     const fetchTeams = async () => {
         try {
-            const response = await fetch('http://localhost:3000/api/teams', {
+            const response = await fetch(`${API_URL}/api/teams`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
@@ -36,7 +37,7 @@ const Dashboard = () => {
     const handleCreateTeam = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:3000/api/teams', {
+            const response = await fetch(`${API_URL}/api/teams`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -63,7 +64,7 @@ const Dashboard = () => {
             setDeletingTeam(teamId);
             const token = localStorage.getItem('token');
 
-            const response = await fetch(`http://localhost:3000/api/teams/${teamId}`, {
+            const response = await fetch(`${API_URL}/api/teams/${teamId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,

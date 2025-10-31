@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Button, Spinner, Alert, Badge } from 'react-bootstrap';
+import { API_URL } from '../config';
 
 const TeamDetails = () => {
   const { id } = useParams();
@@ -36,7 +37,7 @@ const TeamDetails = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/teams/${id}`, {
+      const response = await fetch(`${API_URL}/api/teams/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -69,7 +70,7 @@ const TeamDetails = () => {
       const newValue = Math.max(0, (player[field] || 0) + delta);
 
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:3000/api/players/${playerId}`, {
+      const res = await fetch(`${API_URL}/api/players/${playerId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -106,7 +107,7 @@ const TeamDetails = () => {
       setUpdatingPlayer(playerId);
       const token = localStorage.getItem('token');
 
-      const res = await fetch(`http://localhost:3000/api/players/${id}/players/${playerId}`, {
+      const res = await fetch(`${API_URL}/api/players/${id}/players/${playerId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

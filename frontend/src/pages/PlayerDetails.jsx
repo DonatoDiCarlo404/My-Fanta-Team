@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, Card, Button, ProgressBar } from 'react-bootstrap';
+import { API_URL } from '../config';
 
 const PlayerDetails = () => {
   const { id } = useParams();
@@ -13,7 +14,7 @@ const PlayerDetails = () => {
     const fetchPlayer = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://localhost:3000/api/players/${id}`, {
+        const response = await fetch(`${API_URL}/api/players/${id}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }

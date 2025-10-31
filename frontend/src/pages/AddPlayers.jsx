@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Alert, NavDropdown } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import PlayerCard from '../components/PlayerCardComponent';
+import { API_URL } from '../config';
 
 const AddPlayers = () => {
   const [players, setPlayers] = useState([]);
@@ -14,7 +15,7 @@ const AddPlayers = () => {
   // Funzione per caricare i giocatori della squadra
   const fetchTeamPlayers = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/teams/${id}`, {
+      const response = await fetch(`${API_URL}/api/teams/${id}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -38,7 +39,7 @@ const AddPlayers = () => {
   useEffect(() => {
     const fetchPlayers = async (teamId) => {
       try {
-        const response = await fetch(`http://localhost:3000/api/external/players?teamId=${teamId}`, {
+        const response = await fetch(`${API_URL}/api/external/players?teamId=${teamId}`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -65,7 +66,7 @@ const AddPlayers = () => {
   const handleAddPlayer = async (player) => {
     try {
       // Prima creiamo/otteniamo il giocatore
-      const playerResponse = await fetch('http://localhost:3000/api/players', {
+      const playerResponse = await fetch(`${API_URL}/api/players`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +89,7 @@ const AddPlayers = () => {
       const playerData = await playerResponse.json();
 
       // Aggiunta del giocatore alla squadra
-      const teamResponse = await fetch(`http://localhost:3000/api/teams/${id}/players`, {
+      const teamResponse = await fetch(`${API_URL}/api/teams/${id}/players`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
