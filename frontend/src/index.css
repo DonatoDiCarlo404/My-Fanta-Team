@@ -7,6 +7,12 @@ body {
   min-height: 100vh;
 }
 
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
 h1,
 h2 {
   color: white !important;
@@ -128,6 +134,21 @@ button.btn {
   text-decoration: none;
 }
 
+.form-control::placeholder {
+  color: #6c757d !important;
+  opacity: 1 !important;
+}
+
+.form-control {
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
+.form-control:focus {
+  color: #000000 !important;
+  opacity: 1 !important;
+}
+
 footer i {
   cursor: pointer;
   transition: color 0.3s;
@@ -138,12 +159,9 @@ footer i:hover {
 }
 
 .footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  z-index: 1000; /* sopra eventuali elementi */
-  background-color: #111; /* colore coerente */
+  margin-top: auto;
+  padding: 1rem 0;
+  background-color: #111;
   border-top: 1px solid #333;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.3);
 }
