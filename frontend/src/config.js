@@ -1,27 +1,24 @@
-export const API_URL = import.meta.env.VITE_API_URL || 'https://my-fanta-team-backend.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || 'https://my-fanta-team-backend.onrender.com';
 
-// Debug fetch wrapper
-export const debugFetch = async (url, options = {}) => {
-    console.log('🚀 Chiamata API a:', url);
-    console.log('Opzioni:', options);
+// Production-safe debugging
+try {
+    const debugInfo = {
+        VITE_API_URL: import.meta.env.VITE_API_URL,
+        API_URL: API_URL,
+        MODE: import.meta.env.MODE,
+        IS_PROD: import.meta.env.PROD,
+        IS_DEV: import.meta.env.DEV,
+        TIME: new Date().toISOString()
+    };
 
-    try {
-        const response = await fetch(url, options);
-        console.log('📥 Stato risposta:', response.status);
+    // Force log in both environments
+    console.warn('🔧 [CONFIG] Debug Info:', debugInfo);
+    
+    // Save for console access
+    window._debug = debugInfo;
+    
+} catch (error) {
+    console.error('Debug logging failed:', error);
+}
 
-        const responseText = await response.text();
-        console.log('📝 Risposta raw:', responseText);
-
-        try {
-            const data = JSON.parse(responseText);
-            console.log('📦 Dati parsati:', data);
-            return { data, response };
-        } catch (e) {
-            console.warn('⚠️ Impossibile parsare JSON, la risposta non è JSON:', e);
-            throw new Error(`Errore del server: ${response.status}`);
-        }
-    } catch (error) {
-        console.error('❌ debugFetch errore completo:', error);
-        throw error;
-    }
-};
+export { API_URL };
