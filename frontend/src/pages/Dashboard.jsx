@@ -14,25 +14,47 @@ const Dashboard = () => {
 
     // Carica le squadre dell'utente
     useEffect(() => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
+            return;
+        }
         fetchTeams();
-    }, []);
+    }, [navigate]);
 
     const fetchTeams = async () => {
-        try {
-            const response = await fetch(`${API_URL}/api/teams`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                }
-            });
-
-            if (!response.ok) throw new Error('Errore nel caricamento delle squadre');
-
-            const data = await response.json();
-            setTeams(data);
-        } catch (err) {
-            setError(err.message);
+    try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
+            return;
         }
-    };
+
+        const response = await fetch(`${API_URL}/api/teams`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            navigate('/login');
+            return;
+        }
+
+        const data = await response.json();
+        setTeams(data);
+        setError(''); 
+    } catch (err) {
+        if (!localStorage.getItem('token')) {
+            navigate('/login');
+        } else {
+            setTeams([]);
+            setError('Errore nel caricamento delle squadre');
+        }
+    }
+};
 
     const handleCreateTeam = async (e) => {
         e.preventDefault();
@@ -55,6 +77,11 @@ const Dashboard = () => {
         } catch (err) {
             setError(err.message);
         }
+    };
+
+    const handleCancelCreate = () => {
+        setTeamName('');
+        setShowCreateForm(false);
     };
 
     const handleDeleteTeam = async (teamId) => {
@@ -126,6 +153,13 @@ const Dashboard = () => {
                                 />
                             </Form.Group>
                             <Button type="submit">Crea Squadra</Button>
+                            <Button
+                                variant="secondary"
+                                onClick={handleCancelCreate}
+                                className="ms-2"
+                            >
+                                Annulla
+                            </Button>
                         </Form>
                     </Card.Body>
                 </Card>
