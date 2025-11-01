@@ -72,6 +72,7 @@ const Login = () => {
                     onChange={handleChange}
                     required
                     placeholder="Inserisci la tua email"
+                    autoComplete="off"
                   />
                 </Form.Group>
 
@@ -85,6 +86,7 @@ const Login = () => {
                       onChange={handleChange}
                       required
                       placeholder="Inserisci la tua password"
+                      autoComplete="new-password"
                     />
                     <Button
                       variant="outline-secondary"

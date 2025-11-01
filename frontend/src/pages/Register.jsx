@@ -71,7 +71,7 @@ const Register = () => {
 
               {error && <Alert variant="danger">{error}</Alert>}
 
-              <Form onSubmit={handleSubmit}>
+              <Form onSubmit={handleSubmit} autoComplete="off">
                 <Form.Group className="mb-3" controlId="formUsername">
                   <Form.Label>Username</Form.Label>
                   <Form.Control
@@ -81,6 +81,7 @@ const Register = () => {
                     onChange={handleChange}
                     required
                     placeholder="Inserisci un nome utente"
+                    autoComplete="off"
                   />
                 </Form.Group>
 
@@ -93,6 +94,7 @@ const Register = () => {
                     onChange={handleChange}
                     required
                     placeholder="Inserisci la tua email"
+                    autoComplete="off"
                   />
                 </Form.Group>
 
@@ -107,6 +109,7 @@ const Register = () => {
                       onChange={handleChange}
                       required
                       placeholder="Crea una password"
+                      autoComplete="new-password"
                     />
                     <Button
                       variant="outline-secondary"
@@ -129,6 +132,7 @@ const Register = () => {
                       onChange={handleChange}
                       required
                       placeholder="Ripeti la password"
+                      autoComplete="new-password"
                     />
                     <Button
                       variant="outline-secondary"
