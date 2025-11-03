@@ -154,7 +154,7 @@ const TeamDetails = () => {
           size="lg"
           onClick={() => navigate(`/team/${id}/classifica`)}
         >
-          <i className="bi bi-bar-chart-fill"></i> Vedi Classifica
+          <i className="bi bi-bar-chart-fill"></i> Vedi Classifiche
         </Button>
       </div>
       <Row>

@@ -9,6 +9,7 @@ const AddPlayers = () => {
   const [teamPlayers, setTeamPlayers] = useState([]); // Nuovo stato per i giocatori della squadra
   const [error, setError] = useState('');
   const [teamId, setTeamId] = useState('');
+  const [searchTerm, setSearchTerm] = useState(''); // Stato per la ricerca per cognome
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -118,7 +119,7 @@ const AddPlayers = () => {
 
   return (
     <Container className="mt-4">
-      <h1 className='d-flex justify-content-center'>Aggiungi Giocatori alla Squadra</h1>
+      <h1 className='d-flex justify-content-center'>Aggiungi Calciatori alla Squadra</h1>
 
       {error && <Alert variant="danger">{error}</Alert>}
 
@@ -171,16 +172,44 @@ const AddPlayers = () => {
         </Form.Control>
       </Form.Group>
 
+      {/* Barra di ricerca per cognome */}
+      {teamId && (
+        <Form.Group className="mb-4 w-25 mx-auto">
+          <Form.Control
+            type="text"
+            placeholder="🔍 Cerca calciatore..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="text-center"
+          />
+        </Form.Group>
+      )}
+
       <Row>
-        {players.map(player => (
-          <Col key={player.id} md={4}>
-            <PlayerCard
-              player={player}
-              onAddPlayer={handleAddPlayer}
-            />
-          </Col>
-        ))}
+        {players
+          .filter(player => {
+            // Filtra i giocatori in base al termine di ricerca
+            if (!searchTerm) return true;
+            return player.nome.toLowerCase().includes(searchTerm.toLowerCase());
+          })
+          .map(player => (
+            <Col key={player.id} md={4}>
+              <PlayerCard
+                player={player}
+                onAddPlayer={handleAddPlayer}
+              />
+            </Col>
+          ))}
       </Row>
+
+      {/* Messaggio se non ci sono risultati */}
+      {teamId && searchTerm && players.filter(player => 
+        player.nome.toLowerCase().includes(searchTerm.toLowerCase())
+      ).length === 0 && (
+        <Alert variant="info" className="text-center">
+          Nessun giocatore trovato con il cognome "{searchTerm}"
+        </Alert>
+      )}
     </Container>
   );
 };

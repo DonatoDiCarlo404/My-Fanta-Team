@@ -196,7 +196,7 @@ const Dashboard = () => {
                                         variant="success"
                                         onClick={() => navigate(`/team/${team._id}/add-players`)}
                                     >
-                                        <i className="bi bi-person-add"> Aggiungi Giocatore</i>
+                                        <i className="bi bi-person-add"> Aggiungi Calciatore</i>
                                     </Button>
                                 </div>
                             </Card.Body>

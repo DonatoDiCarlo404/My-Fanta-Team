@@ -41,6 +41,9 @@ const Login = () => {
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       
+      // Emetti un evento custom per notificare la navbar dell'aggiornamento
+      window.dispatchEvent(new Event('userLoggedIn'));
+      
       navigate('/dashboard');
 
     } catch (error) {
@@ -72,7 +75,6 @@ const Login = () => {
                     onChange={handleChange}
                     required
                     placeholder="Inserisci la tua email"
-                    autoComplete="off"
                   />
                 </Form.Group>
 

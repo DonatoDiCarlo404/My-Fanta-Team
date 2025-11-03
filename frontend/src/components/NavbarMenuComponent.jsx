@@ -7,11 +7,27 @@ const NavbarMenuComponent = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Recupera i dati utente dal localStorage al montaggio del componente
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
+    // Funzione per aggiornare lo stato utente dal localStorage
+    const updateUserFromStorage = () => {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        setUser(JSON.parse(userData));
+      } else {
+        setUser(null);
+      }
+    };
+
+    // Carica i dati utente al montaggio
+    updateUserFromStorage();
+
+    // Listener per aggiornamenti al localStorage (custom event)
+    window.addEventListener('storage', updateUserFromStorage);
+    window.addEventListener('userLoggedIn', updateUserFromStorage);
+
+    return () => {
+      window.removeEventListener('storage', updateUserFromStorage);
+      window.removeEventListener('userLoggedIn', updateUserFromStorage);
+    };
   }, []);
 
   const handleLogout = () => {

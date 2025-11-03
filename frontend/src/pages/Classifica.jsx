@@ -79,7 +79,7 @@ const Classifica = () => {
             title={`Classifica Marcatori (${marcatori.length})`}
             className='table-dark'
           >
-            <div className="custom-tabs-content">
+            <div className="custom-tabs-content mb-4 mb-md-0">
             {marcatori.length > 0 ? (
               <Table striped bordered hover responsive className='table-dark'>
                 <thead>
@@ -118,7 +118,7 @@ const Classifica = () => {
             eventKey="assistman"
             title={`Classifica Assist (${assistman.length})`}
           >
-            <div className="custom-tabs-content">
+            <div className="custom-tabs-content mb-4 mb-md-0">
             {assistman.length > 0 ? (
               <>
               <Table striped bordered hover responsive className='table-dark'>
