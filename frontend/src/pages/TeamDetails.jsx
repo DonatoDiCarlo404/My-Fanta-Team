@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card, Button, Spinner, Alert, Badge } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Spinner, Alert, Badge, Form } from 'react-bootstrap';
 import { API_URL } from '../config';
 
 const TeamDetails = () => {
@@ -10,6 +10,7 @@ const TeamDetails = () => {
   const [error, setError] = useState(null);
   const [updatingPlayer, setUpdatingPlayer] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [searchTerm, setSearchTerm] = useState(''); // Stato per la ricerca per cognome
   const navigate = useNavigate();
 
   // Funzione per ordinare i giocatori in base al ruolo
@@ -148,6 +149,20 @@ const TeamDetails = () => {
         </Alert>
       )}
       <h2 className="text-center mb-4">Squadra: {team.nomeSquadra}</h2>
+      
+      {/* Barra di ricerca per cognome */}
+      {team.players && team.players.length > 0 && (
+        <Form.Group className="mb-4 w-50 mx-auto">
+          <Form.Control
+            type="text"
+            placeholder="🔍 Cerca calciatore..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="text-center"
+          />
+        </Form.Group>
+      )}
+
       <div className="text-center mb-4">
         <Button 
           variant="info"
@@ -158,7 +173,13 @@ const TeamDetails = () => {
         </Button>
       </div>
       <Row>
-        {sortPlayersByRole(team.players).map((player) => (
+        {sortPlayersByRole(team.players)
+          .filter(player => {
+            // Filtra i giocatori in base al termine di ricerca
+            if (!searchTerm) return true;
+            return player.nome.toLowerCase().includes(searchTerm.toLowerCase());
+          })
+          .map((player) => (
           <Col key={player._id} md={4} className="mb-3">
             <Card className="shadow-sm h-100 position-relative">
               <Card.Body>
@@ -275,6 +296,15 @@ const TeamDetails = () => {
           </Col>
         ))}
       </Row>
+      
+      {/* Messaggio se non ci sono risultati */}
+      {searchTerm && team.players && sortPlayersByRole(team.players).filter(player => 
+        player.nome.toLowerCase().includes(searchTerm.toLowerCase())
+      ).length === 0 && (
+        <Alert variant="info" className="text-center mt-3">
+          Nessun giocatore trovato!"{searchTerm}"
+        </Alert>
+      )}
     </Container>
   );
 };

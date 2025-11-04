@@ -207,7 +207,7 @@ const AddPlayers = () => {
         player.nome.toLowerCase().includes(searchTerm.toLowerCase())
       ).length === 0 && (
         <Alert variant="info" className="text-center">
-          Nessun giocatore trovato con il cognome "{searchTerm}"
+          Nessun giocatore trovato!"{searchTerm}"
         </Alert>
       )}
     </Container>

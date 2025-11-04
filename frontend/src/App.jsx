@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import NavbarMenuComponent from './components/NavbarMenuComponent';
 import Login from './pages/Login';
@@ -10,8 +10,30 @@ import Classifica from './pages/Classifica';
 import Error from './pages/Error';
 import AddPlayers from './pages/AddPlayers';
 import FooterComponent from './components/FooterComponent';
+import { API_URL } from './config';
 
 function App() {
+  // Keep-alive ping per mantenere il backend attivo
+  useEffect(() => {
+    // Ping iniziale al caricamento
+    const pingBackend = async () => {
+      try {
+        await fetch(`${API_URL}/test`);
+      } catch (error) {
+        // Ignora gli errori del ping
+        console.log('Keep-alive ping');
+      }
+    };
+
+    pingBackend(); // Primo ping immediato
+
+    // Ping ogni 10 minuti (600000 ms) per mantenere il server sveglio
+    const intervalId = setInterval(pingBackend, 600000);
+
+    // Cleanup: rimuovi l'intervallo quando il componente viene smontato
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <Router>
       <NavbarMenuComponent />
