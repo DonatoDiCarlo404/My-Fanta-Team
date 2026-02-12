@@ -10,6 +10,8 @@ const Dashboard = () => {
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [deletingTeam, setDeletingTeam] = useState(null);
+    const [syncing, setSyncing] = useState(false);
+    const [syncResult, setSyncResult] = useState(null);
     const navigate = useNavigate();
 
     // Carica le squadre dell'utente
@@ -115,6 +117,48 @@ const Dashboard = () => {
         }
     };
 
+    const handleSyncPlayers = async () => {
+        if (!window.confirm('⚠️ ATTENZIONE: Questa operazione può richiedere diversi minuti a causa dei limiti dell\'API (10 richieste/minuto).\n\nVerranno sincronizzate solo le squadre con giocatori nel tuo database.\n\nVuoi continuare?')) return;
+
+        try {
+            setSyncing(true);
+            setSyncResult(null);
+            setError('');
+            
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_URL}/api/external/sync-players`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.status === 429) {
+                throw new Error('Rate limit raggiunto. Attendi qualche minuto e riprova.');
+            }
+
+            if (!response.ok) throw new Error(data.message || 'Errore durante la sincronizzazione');
+
+            setSyncResult(data.stats);
+            if (data.stats.aggiornati > 0) {
+                setSuccessMessage(`✅ Sincronizzazione completata! ${data.stats.aggiornati} giocatori aggiornati.`);
+            } else {
+                setSuccessMessage(`✅ Sincronizzazione completata! Tutte le rose sono già aggiornate.`);
+            }
+            setTimeout(() => {
+                setSuccessMessage('');
+                setSyncResult(null);
+            }, 15000);
+        } catch (err) {
+            setError(err.message || 'Errore durante la sincronizzazione');
+        } finally {
+            setSyncing(false);
+        }
+    };
+
     return (
         <Container className="mt-4">
             <h1 className="mb-4 text-center">Le Mie Squadre</h1>
@@ -130,14 +174,50 @@ const Dashboard = () => {
                 </Alert>
             )}
 
+            {syncResult && (
+                <Alert variant="info" className="text-center">
+                    <strong>Risultati Sincronizzazione:</strong>
+                    <div className="mt-2">
+                        <div>Giocatori totali: {syncResult.totale}</div>
+                        <div>Aggiornati: {syncResult.aggiornati}</div>
+                        <div>Invariati: {syncResult.invariati}</div>
+                        <div>Squadre processate: {syncResult.squadreProcessate}</div>
+                        {syncResult.errori.length > 0 && (
+                            <div className="text-warning mt-2">
+                                Errori: {syncResult.errori.join(', ')}
+                            </div>
+                        )}
+                    </div>
+                </Alert>
+            )}
 
-            <Button
-                variant="primary"
-                className="mb-4"
-                onClick={() => setShowCreateForm(!showCreateForm)}
-            >
-                + Crea nuova squadra
-            </Button>
+            <div className="d-flex gap-2 mb-4">
+                <Button
+                    variant="primary"
+                    onClick={() => setShowCreateForm(!showCreateForm)}
+                >
+                    + Crea nuova squadra
+                </Button>
+
+                <Button
+                    variant="warning"
+                    onClick={handleSyncPlayers}
+                    disabled={syncing}
+                    className="ms-auto"
+                >
+                    {syncing ? (
+                        <>
+                            <span className="spinner-border spinner-border-sm me-2" />
+                            Sincronizzazione in corso... (può richiedere minuti)
+                        </>
+                    ) : (
+                        <>
+                            <i className="bi bi-arrow-repeat me-2"></i>
+                            Aggiorna Rose Serie A
+                        </>
+                    )}
+                </Button>
+            </div>
 
             {showCreateForm && (
                 <Card className="mb-4">

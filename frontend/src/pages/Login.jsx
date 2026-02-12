@@ -10,6 +10,7 @@ const Login = () => {
   });
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -21,8 +22,12 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    setIsLoading(true);
 
     try {
+      console.log('Tentativo di login a:', `${API_URL}/api/auth/login`);
+      
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
@@ -31,7 +36,10 @@ const Login = () => {
         body: JSON.stringify(formData)
       });
 
+      console.log('Response status:', response.status);
+
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Errore durante il login');
@@ -47,7 +55,10 @@ const Login = () => {
       navigate('/dashboard');
 
     } catch (error) {
-      setError(error.message);
+      console.error('Errore login:', error);
+      setError(error.message || 'Impossibile connettersi al server. Verifica che il backend sia attivo.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -100,8 +111,17 @@ const Login = () => {
                   </InputGroup>
                 </Form.Group>
 
-                <Button variant="primary" type="submit" className="w-100 mt-2">
-                  <i className="bi bi-box-arrow-in-right me-2"></i>Accedi
+                <Button variant="primary" type="submit" className="w-100 mt-2" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2"></span>
+                      Accesso in corso...
+                    </>
+                  ) : (
+                    <>
+                      <i className="bi bi-box-arrow-in-right me-2"></i>Accedi
+                    </>
+                  )}
                 </Button>
               </Form>
             </Card.Body>
