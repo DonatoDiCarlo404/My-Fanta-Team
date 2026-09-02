@@ -118,7 +118,7 @@ const Dashboard = () => {
     };
 
     const handleSyncPlayers = async () => {
-        if (!window.confirm('⚠️ ATTENZIONE: Questa operazione può richiedere diversi minuti a causa dei limiti dell\'API (10 richieste/minuto).\n\nVerranno sincronizzate solo le squadre con giocatori nel tuo database.\n\nVuoi continuare?')) return;
+        if (!window.confirm('⚠️ ATTENZIONE: Questa operazione può richiedere diversi minuti a causa dei limiti dell\'API (10 richieste/minuto).\n\nVerranno sincronizzate tutte le 20 squadre di Serie A.\nI giocatori mancanti verranno aggiunti automaticamente.\n\nVuoi continuare?')) return;
 
         try {
             setSyncing(true);
@@ -143,8 +143,11 @@ const Dashboard = () => {
             if (!response.ok) throw new Error(data.message || 'Errore durante la sincronizzazione');
 
             setSyncResult(data.stats);
-            if (data.stats.aggiornati > 0) {
-                setSuccessMessage(`✅ Sincronizzazione completata! ${data.stats.aggiornati} giocatori aggiornati.`);
+            if (data.stats.aggiornati > 0 || data.stats.aggiunti > 0) {
+                const messaggi = [];
+                if (data.stats.aggiunti > 0) messaggi.push(`${data.stats.aggiunti} giocatori aggiunti`);
+                if (data.stats.aggiornati > 0) messaggi.push(`${data.stats.aggiornati} giocatori aggiornati`);
+                setSuccessMessage(`✅ Sincronizzazione completata! ${messaggi.join(', ')}.`);
             } else {
                 setSuccessMessage(`✅ Sincronizzazione completata! Tutte le rose sono già aggiornate.`);
             }
@@ -178,7 +181,8 @@ const Dashboard = () => {
                 <Alert variant="info" className="text-center">
                     <strong>Risultati Sincronizzazione:</strong>
                     <div className="mt-2">
-                        <div>Giocatori totali: {syncResult.totale}</div>
+                        <div>Giocatori iniziali: {syncResult.totale}</div>
+                        <div>Aggiunti: {syncResult.aggiunti || 0}</div>
                         <div>Aggiornati: {syncResult.aggiornati}</div>
                         <div>Invariati: {syncResult.invariati}</div>
                         <div>Squadre processate: {syncResult.squadreProcessate}</div>

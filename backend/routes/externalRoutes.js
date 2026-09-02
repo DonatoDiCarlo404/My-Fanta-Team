@@ -4,30 +4,51 @@ const Player = require('../models/Player');
 const { authMiddleware } = require('../middlewares/authMiddleware');
 require('dotenv').config();
 
-// ID delle squadre Serie A su football-data.org
-const SERIE_A_TEAMS = [
-    108, // Inter
-    109, // Juventus
-    110, // Lazio
-    98,  // Milan
-    99,  // Fiorentina
-    100, // Roma
-    102, // Atalanta
-    103, // Bologna
-    104, // Cagliari
-    107, // Genoa
-    108, // Inter
-    112, // Parma
-    113, // Napoli
-    115, // Udinese
-    450, // Hellas Verona
-    471, // Torino
-    488, // Empoli
-    511, // Sassuolo
-    514, // Salernitana
-    584, // Monza
-    1106 // Como
-];
+router.get('/serie-a-teams', authMiddleware, async (req, res) => {
+    const url = 'https://api.football-data.org/v4/competitions/SA/teams';
+    const options = {
+        method: 'GET',
+        headers: {
+            'X-Auth-Token': process.env.FOOTBALL_API_TOKEN,
+            'Content-Type': 'application/json'
+        }
+    };
+
+    try {
+        const response = await fetch(url, options);
+
+        if (response.status === 429) {
+            return res.status(429).json({
+                message: 'Rate limit raggiunto. Riprova tra qualche minuto.'
+            });
+        }
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            return res.status(response.status).json({
+                message: 'Errore nel recupero delle squadre Serie A',
+                error: errorData
+            });
+        }
+
+        const data = await response.json();
+        const teams = (data.teams || [])
+            .map(team => ({
+                id: team.id,
+                nome: team.name,
+                shortName: team.shortName
+            }))
+            .sort((a, b) => a.nome.localeCompare(b.nome, 'it'));
+
+        res.json(teams);
+    } catch (error) {
+        console.error('Errore recupero squadre Serie A:', error);
+        res.status(500).json({
+            message: 'Errore nel recupero delle squadre Serie A',
+            error: error.message
+        });
+    }
+});
 
 router.get('/players', async (req, res) => {
     const { teamId } = req.query;
@@ -101,20 +122,6 @@ router.post('/sync-players', authMiddleware, async (req, res) => {
         const dbPlayers = await Player.find();
         console.log(`Trovati ${dbPlayers.length} giocatori nel database`);
         
-        if (dbPlayers.length === 0) {
-            return res.json({
-                success: true,
-                message: 'Nessun giocatore da sincronizzare',
-                stats: {
-                    totale: 0,
-                    aggiornati: 0,
-                    invariati: 0,
-                    squadreProcessate: 0,
-                    errori: []
-                }
-            });
-        }
-        
         // Crea una mappa degli ID API per un accesso rapido
         const playerMap = new Map();
         dbPlayers.forEach(player => {
@@ -123,6 +130,7 @@ router.post('/sync-players', authMiddleware, async (req, res) => {
 
         let updated = 0;
         let unchanged = 0;
+        let added = 0;
         let errors = [];
 
         // Recupera le squadre Serie A dall'API
@@ -151,16 +159,6 @@ router.post('/sync-players', authMiddleware, async (req, res) => {
 
         // Per ogni squadra, recupera la rosa e aggiorna i giocatori
         for (const team of teamsData.teams) {
-            // Controlla se abbiamo giocatori di questa squadra
-            const hasPlayersFromTeam = dbPlayers.some(p => 
-                p.squadra === team.name || p.squadra === team.shortName
-            );
-            
-            if (!hasPlayersFromTeam) {
-                console.log(`Saltando ${team.name} - nessun giocatore nel database`);
-                continue;
-            }
-            
             console.log(`Processando squadra: ${team.name}`);
             
             // Pausa per rispettare i rate limits dell'API (7 secondi)
@@ -195,7 +193,7 @@ router.post('/sync-players', authMiddleware, async (req, res) => {
                 const dbPlayer = playerMap.get(apiPlayer.id);
                 
                 if (dbPlayer) {
-                    // Verifica se la squadra è cambiata
+                    // Giocatore esistente: verifica se la squadra è cambiata
                     if (dbPlayer.squadra !== teamData.name) {
                         console.log(`Aggiornamento: ${dbPlayer.nome} da ${dbPlayer.squadra} a ${teamData.name}`);
                         
@@ -209,6 +207,21 @@ router.post('/sync-players', authMiddleware, async (req, res) => {
                     } else {
                         unchanged++;
                     }
+                } else {
+                    // Giocatore non presente nel database: aggiungi
+                    console.log(`Aggiunta nuovo giocatore: ${apiPlayer.name} (${teamData.name})`);
+                    
+                    const newPlayer = new Player({
+                        apiId: apiPlayer.id,
+                        nome: apiPlayer.name,
+                        ruolo: apiPlayer.position || 'Sconosciuto',
+                        nazionalità: apiPlayer.nationality || 'Sconosciuta',
+                        squadra: teamData.name
+                    });
+                    
+                    await newPlayer.save();
+                    playerMap.set(apiPlayer.id, newPlayer); // Aggiorna la mappa
+                    added++;
                 }
             }
         }
@@ -219,6 +232,7 @@ router.post('/sync-players', authMiddleware, async (req, res) => {
             stats: {
                 totale: dbPlayers.length,
                 aggiornati: updated,
+                aggiunti: added,
                 invariati: unchanged,
                 squadreProcessate: processedTeams,
                 errori: errors

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Form, Alert, NavDropdown } from 'react-bootstrap';
+import { Container, Row, Col, Form, Alert } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import PlayerCard from '../components/PlayerCardComponent';
 import { API_URL } from '../config';
@@ -7,6 +7,7 @@ import { API_URL } from '../config';
 const AddPlayers = () => {
   const [players, setPlayers] = useState([]);
   const [teamPlayers, setTeamPlayers] = useState([]); // Nuovo stato per i giocatori della squadra
+  const [serieATeams, setSerieATeams] = useState([]);
   const [error, setError] = useState('');
   const [teamId, setTeamId] = useState('');
   const [searchTerm, setSearchTerm] = useState(''); // Stato per la ricerca per cognome
@@ -35,6 +36,28 @@ const AddPlayers = () => {
   useEffect(() => {
     fetchTeamPlayers();
   }, [id]);
+
+  // Carica le squadre Serie A dal backend (ID ufficiali football-data)
+  useEffect(() => {
+    const fetchSerieATeams = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/external/serie-a-teams`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        if (!response.ok) throw new Error('Errore nel caricamento delle squadre Serie A');
+
+        const data = await response.json();
+        setSerieATeams(data);
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+    fetchSerieATeams();
+  }, []);
 
   // Carica i giocatori disponibili quando viene selezionata una squadra
   useEffect(() => {
@@ -127,48 +150,13 @@ const AddPlayers = () => {
         <Form.Label className='text-dark'>Seleziona una Squadra di Serie A</Form.Label>
         <Form.Control
           as="select"
+          value={teamId}
           onChange={(e) => setTeamId(e.target.value)}
         >
           <option value="">Seleziona...</option>
-          <option value="102">Atalanta</option>
-          <NavDropdown.Divider />
-          <option value="103">Bologna</option>
-          <NavDropdown.Divider />
-          <option value="104">Cagliari</option>
-          <NavDropdown.Divider />
-          <option value="7397">Como</option>
-          <NavDropdown.Divider />
-          <option value="457">Cremonese</option>
-          <NavDropdown.Divider />
-          <option value="99">Fiorentina</option>
-          <NavDropdown.Divider />
-          <option value="107">Genoa</option>
-          <NavDropdown.Divider />
-          <option value="108">Inter</option>
-          <NavDropdown.Divider />
-          <option value="109">Juventus</option>
-          <NavDropdown.Divider />
-          <option value="110">Lazio</option>
-          <NavDropdown.Divider />
-          <option value="5890">Lecce</option>
-          <NavDropdown.Divider />
-          <option value="98">Milan</option>
-          <NavDropdown.Divider />
-          <option value="113">Napoli</option>
-          <NavDropdown.Divider />
-          <option value="112">Parma</option>
-          <NavDropdown.Divider />
-          <option value="487">Pisa</option>
-          <NavDropdown.Divider />
-          <option value="100">Roma</option>
-          <NavDropdown.Divider />
-          <option value="471">Sassuolo</option>
-          <NavDropdown.Divider />
-          <option value="586">Torino</option>
-          <NavDropdown.Divider />
-          <option value="115">Udinese</option>
-          <NavDropdown.Divider />
-          <option value="450">Hellas Verona</option>
+          {serieATeams.map((team) => (
+            <option key={team.id} value={team.id}>{team.nome}</option>
+          ))}
         </Form.Control>
       </Form.Group>
 
